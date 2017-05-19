@@ -1,0 +1,30 @@
+{
+  "name": "learn3",
+  "version": "1.0.0",
+  "description": "three.js demos",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangb-biu/learn3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tangb-biu/learn3/issues"
+  },
+  "homepage": "https://github.com/tangb-biu/learn3#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-connect": "^1.0.2",
+    "grunt-contrib-uglify": "^3.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "load-grunt-tasks": "^3.5.2",
+    "time-grunt": "^1.4.0"
+  },
+  "dependencies": {
+    "three.js": "^0.77.1"
+  }
+}
