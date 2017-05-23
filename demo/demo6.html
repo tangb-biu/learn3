@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>demo6</title>
+	<style type="text/css">
+		body{
+			margin: 0;
+			padding: 0;
+			border: none;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+<script type="text/javascript" src="../lib/three.js"></script>
+<script type="text/javascript" src="../lib/stats.js"></script>
+<script type="text/javascript" src="../lib/dat.gui.js"></script>
+<script type="text/javascript">
+function init() {
+	
+	var stats = initStats();
+
+	var Three = THREE;
+	var scene = new Three.Scene();
+
+	var camera = new Three.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+	scene.add(camera);
+
+	var renderer = new Three.WebGLRenderer();
+
+	renderer.setClearColor(new Three.Color(0xffffff, 1.0));
+
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.shadowMapEnabled = true;
+	// 生成平面
+	var planeGeometry = new Three.PlaneGeometry(60, 40, 1, 1);
+
+	var planeMaterial = new Three.MeshLambertMaterial({color:0xffffff});
+
+	var plane = new Three.Mesh(planeGeometry, planeMaterial);
+	plane.receiveShadow = true;
+	plane.position.set(0, 0, 0);
+	plane.rotation.x = -0.5 * Math.PI;
+	scene.add(plane);
+
+	var ambientLight = new Three.AmbientLight(0x0c0c0c);
+	scene.add(ambientLight);
+
+	var spotLight = new Three.SpotLight(0xffffff);
+	spotLight.position.set(-40, 60, -10);
+	spotLight.castShadow = true;
+	scene.add(spotLight);
+
+	camera.position.set(-30, 40, 30);
+	camera.lookAt(scene.position);
+	renderer.render(scene, camera);
+	document.body.appendChild(renderer.domElement);
+	
+	var controls = {
+		rotationSpeed : 0.02,
+		numberOfObjects: scene.children.length,
+		removeCube: function() {
+			var all = scene.children;
+			var lastObject = all.slice(-1)[0];
+			if(lastObject instanceof Three.Mesh) {
+				scene.remove(lastObject);
+				this.numberOfObjects = scene.children.length;
+			}
+		},
+		addCube : function () {
+			var cubeSize = Math.ceil(Math.random() * 3);
+			var cubeGeometry = new Three.BoxGeometry(cubeSize, cubeSize, cubeSize);
+			var cubeMaterial = new Three.MeshLambertMaterial({color: Math.random()*0xffffff});
+			var cube = new Three.Mesh(cubeGeometry, cubeMaterial);
+			cube.castShadow = true;
+			cube.name = 'cube-' + scene.children.length;
+
+			cube.position.x = -30 + Math.round(
+				Math.random() * planeGeometry.parameters.width);
+			cube.position.y = Math.round(
+				Math.random() * 5);
+
+			cube.position.z = -20 + Math.round(Math.random() * planeGeometry.parameters.height);
+
+			scene.add(cube);
+			this.numberOfObjects = scene.children.length;
+		},
+		outputObjects: function () {
+			console.log(scene.children);
+		}
+
+	}
+
+	var gui = new dat.GUI();
+	gui.add(controls, 'rotationSpeed', 0, 0.5);
+	gui.add(controls, 'addCube');
+	gui.add(controls, 'removeCube');
+	gui.add(controls, 'outputObjects');
+	gui.add(controls, 'numberOfObjects').listen();
+
+	render();
+	function render() {
+		stats.update();
+		scene.traverse(function (e) {
+			if(e instanceof Three.Mesh && e != plane) {
+				e.rotation.x += controls.rotationSpeed;
+				e.rotation.y += controls.rotationSpeed;
+				e.rotation.z += controls.rotationSpeed;
+			}
+		})
+		requestAnimationFrame(render);
+		renderer.render(scene, camera);
+	}
+
+	function initStats() {
+		var stats = new Stats();
+		stats.setMode(0);
+
+		stats.domElement.style.position = 'absolute';
+		stats.domElement.style.left = '0px';
+		stats.domElement.style.top = '0px';
+
+		document.body.appendChild(stats.domElement);
+		return stats;
+	}
+
+}
+
+
+
+window.onload = init();
+</script>
+</body>
+</html>
