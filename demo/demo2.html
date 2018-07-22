@@ -1,73 +1,137 @@
-<!DOCTYPE html>
 <html>
-<head>
-	<title>spinning cube</title>
-	<meta charset="utf-8">
-	<style type="text/css">
-		body{
-			margin: 0;
-		}
-		canvas {
-			width: 100%;
-			height: 100%;
-		}
-	</style>
-</head>
-<body>
-<script type="text/javascript" src="../lib/three.js"></script>
-<script type="text/javascript">
+    <head>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            #j_container{
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <script src="../lib/three.js"></script>
+    </head>
+    <body>
+
+        <div id="j_container"></div>
+        <script type="text/javascript">
+            var Three = window.THREE;
+
+            var scene, renderer, camera;
+            var width = window.innerWidth,
+                height = window.innerHeight,
+                group;
+            var startX = 0,
+                moveX = 0,
+                dom;
+
+            initEnv();
+            drawAxis();
+            drawObjects();
+
+            function initEnv() {
+                renderer = new Three.WebGLRenderer({
+                    antialias: true
+                });
+                renderer.setSize(width, height);
+                renderer.setClearColor(0xffffff, 1.0);
+                dom = renderer.domElement;
+                document.getElementById('j_container').appendChild(dom);
+
+                group = new Three.Group();
+
+                scene = new Three.Scene();
+                scene.add(group);
+                camera = new Three.PerspectiveCamera(60, width / height, 1, 1000);
+                camera.position.set(300, 300, 300);
+                camera.up.set(0, 1, 0);
+                camera.lookAt(0, 0, 0);
+                scene.add(camera);
+                renderer.domElement.addEventListener('mousedown', onElementMousedown, false);
+            }
+
+            function drawAxis() {
+                var geometry = new Three.Geometry();
+                var material = new Three.LineBasicMaterial({color: 0xff0000, opacity: 1.0});
+                geometry.vertices.push(new Three.Vector3(0, 0, 0));
+                geometry.vertices.push(new Three.Vector3(1000, 0, 0));
+                var xAxis = new Three.Line(geometry, material);
+
+                geometry = new Three.Geometry();
+                material = new Three.LineBasicMaterial({color: 0x00ff00, opacity: 1.0});
+                geometry.vertices.push(new Three.Vector3(0, 0, 0));
+                geometry.vertices.push(new Three.Vector3(0, 1000, 0));
+                var yAxis = new Three.Line(geometry, material);
+
+                geometry = new Three.Geometry();
+                material = new Three.LineBasicMaterial({color: 0x0000ff, opacity: 1.0});
+                geometry.vertices.push(new Three.Vector3(0, 0, 0));
+                geometry.vertices.push(new Three.Vector3(0, 0, 1000));
+                var zAxis = new Three.Line(geometry, material);
+
+                scene.add(xAxis);
+                scene.add(yAxis);
+                scene.add(zAxis);
+            }
+
+            function drawObjects() {
+                var loader = new THREE.TextureLoader();
+                loader.load('../textures/land_ocean_ice_cloud_2048.jpg', function(texture) {
+                    var geom = new Three.SphereGeometry(200, 200, 200);
+                    var material = new Three.MeshBasicMaterial({overdraw: 0.5, map: texture});
+                    var sphere = new Three.Mesh(geom, material);
+                    //sphere.position.set(0, 0, 0);
+                    group.add(sphere);
+                    render();
+                }, function(xhr) {
+                    console.log( (xhr.loaded / xhr.total * 100 )+ '% loaded');
+                }, function(xhr) {
+                    console.log('An error happened');
+                });
+            }
+
+            function onElementMousedown(e) {
+                startX = e.clientX;
+                moveX = 0;
+                dom.addEventListener("mouseout", onElementMouseout, false);
+
+                dom.addEventListener("mouseup", onElementMouseup, false);
+
+                dom.addEventListener("mousemove", onElementMousemove, false);
+            }
+
+            function onElementMouseup() {
+                dom.removeEventListener("mouseout", onElementMouseout, false);
+
+                dom.removeEventListener("mouseup", onElementMouseup, false);
+
+                dom.removeEventListener("mousemove", onElementMousemove, false);
+            }
+
+            function onElementMouseout() {
+                dom.removeEventListener("mouseout", onElementMouseout, false);
+
+                dom.removeEventListener("mouseup", onElementMouseup, false);
+
+                dom.removeEventListener("mousemove", onElementMousemove, false);
+            }
+
+            function onElementMousemove(e) {
+                moveX = e.clientX - startX - moveX;
+            }
+
+            function render() {
+
+                renderer.clear();
+                var ratio = moveX/1000;
+                group.rotation.y += ratio;
+                camera.lookAt(scene.position);
+                renderer.render(scene, camera);
+                requestAnimationFrame(render);
+            }
 
 
-var Three = THREE;
-
-var scene = new Three.Scene();
-var camera = new Three.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-
-var renderer = new Three.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-var geometry = new Three.BoxGeometry(1, 1, 1);
-var material = new Three.MeshBasicMaterial({color: 0x00ff00});
-var cube = new Three.Mesh(geometry, material);
-scene.add(cube);
-camera.position.z = 5;
-
-function render() {
-	requestAnimationFrame( render );
-	
-	cube.rotation.x += 0.1;
-	cube.rotation.y += 0.1;
-	
-	renderer.render(scene, camera);
-}
-
-render();
-
-// var scene = new THREE.Scene();
-// var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
-// var renderer = new THREE.WebGLRenderer();
-// renderer.setSize( window.innerWidth, window.innerHeight );
-// document.body.appendChild( renderer.domElement );
-
-// var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-// var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// var cube = new THREE.Mesh( geometry, material );
-// scene.add( cube );
-
-// camera.position.z = 5;
-
-// var render = function () {
-// 	requestAnimationFrame( render );
-
-// 	cube.rotation.x += 0.1;
-// 	cube.rotation.y += 0.1;
-
-// 	renderer.render(scene, camera);
-// };
-
-// render();
-</script>
-</body>
+        </script>
+    </body>
 </html>
